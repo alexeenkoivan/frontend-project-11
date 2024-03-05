@@ -5,6 +5,9 @@ const schema = yup.object().shape({
   rssInput: yup.string().url().required(),
 });
 
+// Объявляем массив feedList вне функций, чтобы он был доступен глобально
+const feedList = [];
+
 export function handleSubmit(event) {
   event.preventDefault();
 
@@ -13,13 +16,19 @@ export function handleSubmit(event) {
 
   schema.validate(data)
     .then(() => {
+      if (feedList.includes(data.rssInput)) {
+        throw new Error('Дубликат URL');
+      }
+
       console.log('Данные валидны:', data);
+
+      feedList.push(data.rssInput);
 
       event.target.reset();
       event.target.querySelector('input').focus();
     })
     .catch((error) => {
-      console.error('Ошибка валидации:', error.errors);
+      console.error('Ошибка валидации:', error.message);
 
       const input = event.target.querySelector('input');
       input.classList.add('error');
@@ -46,7 +55,9 @@ export function watchForm(form) {
     watchedFormData.rssInput = event.target.value;
   });
 
-  form.addEventListener('submit', handleSubmit);
+  form.addEventListener('submit', (event) => {
+    handleSubmit(event); // Убрали лишний аргумент feedList
+  });
 }
 
 document.addEventListener('DOMContentLoaded', () => {
