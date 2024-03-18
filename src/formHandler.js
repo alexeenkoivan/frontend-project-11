@@ -5,7 +5,6 @@ const schema = yup.object().shape({
   rssInput: yup.string().url().required(),
 });
 
-// Объявляем массив feedList вне функций, чтобы он был доступен глобально
 const feedList = [];
 
 export function handleSubmit(event) {
@@ -56,7 +55,7 @@ export function watchForm(form) {
   });
 
   form.addEventListener('submit', (event) => {
-    handleSubmit(event); // Убрали лишний аргумент feedList
+    handleSubmit(event);
   });
 }
 
