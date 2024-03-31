@@ -1,5 +1,16 @@
 import * as yup from 'yup';
 import onChange from 'on-change';
+import i18n from './i18n';
+
+yup.setLocale({
+  mixed: {
+    default: i18n.t('errors.unknown'),
+  },
+  string: {
+    url: i18n.t('errors.notUrl'),
+    required: i18n.t('errors.empty'),
+  },
+});
 
 const schema = yup.object().shape({
   rssInput: yup.string().url().required(),
@@ -16,7 +27,7 @@ export function handleSubmit(event) {
   schema.validate(data)
     .then(() => {
       if (feedList.includes(data.rssInput)) {
-        throw new Error('Дубликат URL');
+        throw new Error('duplicate');
       }
 
       console.log('Данные валидны:', data);
@@ -27,7 +38,7 @@ export function handleSubmit(event) {
       event.target.querySelector('input').focus();
     })
     .catch((error) => {
-      console.error('Ошибка валидации:', error.message);
+      console.error('Ошибка валидации:', i18n.t(`errors.${error.message}`));
 
       const input = event.target.querySelector('input');
       input.classList.add('error');
@@ -54,9 +65,7 @@ export function watchForm(form) {
     watchedFormData.rssInput = event.target.value;
   });
 
-  form.addEventListener('submit', (event) => {
-    handleSubmit(event);
-  });
+  form.addEventListener('submit', handleSubmit);
 }
 
 document.addEventListener('DOMContentLoaded', () => {
