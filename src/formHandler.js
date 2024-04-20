@@ -1,6 +1,7 @@
 import * as yup from 'yup';
 import onChange from 'on-change';
 import i18n from './i18n';
+import fetchRSS from './rss';
 
 yup.setLocale({
   mixed: {
@@ -36,6 +37,14 @@ export function handleSubmit(event) {
 
       event.target.reset();
       event.target.querySelector('input').focus();
+
+      fetchRSS(data.rssInput)
+        .then((rssData) => {
+          console.log('Данные RSS:', rssData);
+        })
+        .catch((error) => {
+          console.error('Ошибка загрузки RSS:', error);
+        });
     })
     .catch((error) => {
       console.error('Ошибка валидации:', i18n.t(`errors.${error.message}`));
