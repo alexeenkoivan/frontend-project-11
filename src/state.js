@@ -3,6 +3,7 @@ const state = {
   posts: [],
   loading: false,
   error: null,
+  readPosts: new Set(),
 };
 
 export default state;

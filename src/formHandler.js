@@ -26,7 +26,6 @@ const state = {
   posts: [],
 };
 
-// Функция для проверки обновлений RSS-потоков
 const updateFeeds = () => {
   const promises = state.feeds.map((feed) => axios.get(`https://allorigins.hexlet.app/get?url=${encodeURIComponent(feed.url)}`)
     .then((response) => {
@@ -68,7 +67,6 @@ export function handleSubmit(event) {
         .then((rssData) => {
           console.log('Данные RSS:', rssData);
 
-          // Добавляем новый RSS-поток в состояние
           state.feeds.push({ id: uniqueId(), url: data.rssInput });
           state.posts.push(...rssData.posts.map((post) => ({
             ...post,
@@ -114,5 +112,5 @@ export function watchForm(form) {
 document.addEventListener('DOMContentLoaded', () => {
   const form = document.querySelector('form');
   watchForm(form);
-  updateFeeds(); // Запускаем проверку обновлений RSS-потоков
+  updateFeeds();
 });
