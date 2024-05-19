@@ -1,7 +1,10 @@
 import * as yup from 'yup';
 import onChange from 'on-change';
+import axios from 'axios';
+import { uniqueId } from 'lodash';
 import i18n from './i18n';
 import fetchRSS from './rss';
+import parser from './parser';
 
 yup.setLocale({
   mixed: {
@@ -18,6 +21,29 @@ const schema = yup.object().shape({
 });
 
 const feedList = [];
+const state = {
+  feeds: [],
+  posts: [],
+};
+
+// Функция для проверки обновлений RSS-потоков
+const updateFeeds = () => {
+  const promises = state.feeds.map((feed) => axios.get(`https://allorigins.hexlet.app/get?url=${encodeURIComponent(feed.url)}`)
+    .then((response) => {
+      const { posts } = parser(response.data.contents);
+      const newPosts = posts.filter((post) => !state.posts.find((p) => p.link === post.link));
+      newPosts.forEach((newPost) => {
+        const post = newPost;
+        post.id = uniqueId();
+        post.feedId = feed.id;
+      });
+      state.posts.push(...newPosts);
+    }));
+
+  Promise.all(promises).finally(() => {
+    setTimeout(updateFeeds, 5000);
+  });
+};
 
 export function handleSubmit(event) {
   event.preventDefault();
@@ -41,6 +67,14 @@ export function handleSubmit(event) {
       fetchRSS(data.rssInput)
         .then((rssData) => {
           console.log('Данные RSS:', rssData);
+
+          // Добавляем новый RSS-поток в состояние
+          state.feeds.push({ id: uniqueId(), url: data.rssInput });
+          state.posts.push(...rssData.posts.map((post) => ({
+            ...post,
+            id: uniqueId(),
+            feedId: state.feeds[state.feeds.length - 1].id,
+          })));
         })
         .catch((error) => {
           console.error('Ошибка загрузки RSS:', error);
@@ -80,4 +114,5 @@ export function watchForm(form) {
 document.addEventListener('DOMContentLoaded', () => {
   const form = document.querySelector('form');
   watchForm(form);
+  updateFeeds(); // Запускаем проверку обновлений RSS-потоков
 });
