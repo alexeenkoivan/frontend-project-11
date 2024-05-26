@@ -67,7 +67,7 @@ export function handleSubmit(event) {
         .then((rssData) => {
           console.log('Данные RSS:', rssData);
 
-          state.feeds.push({ id: uniqueId(), url: data.rssInput });
+          state.feeds.push(rssData.feed);
           state.posts.push(...rssData.posts.map((post) => ({
             ...post,
             id: uniqueId(),
