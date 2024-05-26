@@ -4,7 +4,7 @@ import axios from 'axios';
 import { uniqueId } from 'lodash';
 import i18n from './i18n';
 import fetchRSS from './rss';
-import parser from './parser';
+import parse from './parser';
 
 yup.setLocale({
   mixed: {
@@ -20,16 +20,17 @@ const schema = yup.object().shape({
   rssInput: yup.string().url().required(),
 });
 
-const feedList = [];
 const state = {
   feeds: [],
   posts: [],
+  formState: 'filling',
+  error: null,
 };
 
 const updateFeeds = () => {
-  const promises = state.feeds.map((feed) => axios.get(`https://allorigins.hexlet.app/get?url=${encodeURIComponent(feed.url)}`)
+  const promises = state.feeds.map((feed) => axios.get(`https://allorigins.hexlet.app/get?disableCache=true&url=${encodeURIComponent(feed.url)}`)
     .then((response) => {
-      const { posts } = parser(response.data.contents);
+      const { posts } = parse(response.data.contents);
       const newPosts = posts.filter((post) => !state.posts.find((p) => p.link === post.link));
       newPosts.forEach((newPost) => {
         const post = newPost;
@@ -37,6 +38,9 @@ const updateFeeds = () => {
         post.feedId = feed.id;
       });
       state.posts.push(...newPosts);
+    })
+    .catch((error) => {
+      console.error('Ошибка при обновлении RSS:', error.message);
     }));
 
   Promise.all(promises).finally(() => {
@@ -52,13 +56,13 @@ export function handleSubmit(event) {
 
   schema.validate(data)
     .then(() => {
-      if (feedList.includes(data.rssInput)) {
-        throw new Error('duplicate');
+      if (state.feeds.some((feed) => feed.url === data.rssInput)) {
+        throw new Error('alreadyInList');
       }
 
       console.log('Данные валидны:', data);
 
-      feedList.push(data.rssInput);
+      state.feeds.push(data.rssInput);
 
       event.target.reset();
       event.target.querySelector('input').focus();
@@ -75,7 +79,8 @@ export function handleSubmit(event) {
           })));
         })
         .catch((error) => {
-          console.error('Ошибка загрузки RSS:', error);
+          console.error('Ошибка загрузки RSS:', error.message);
+          state.error = 'networkError';
         });
     })
     .catch((error) => {

@@ -7,14 +7,14 @@
     <link href="https://stackpath.bootstrapcdn.com/bootstrap/5.0.0/css/bootstrap.min.css" rel="stylesheet">
   </head>
   <body>
-    <form>
+    <form class="rss-form">
       <label for="rssInput">Введите RSS-поток:</label>
       <input type="text" id="rssInput" name="rssInput" aria-label="url"/>
       <button type="submit">Добавить</button>
     </form>
-    <h1>Hello world!</h1>
-    <h2>Tip: Check your console</h2>
-
+    <div class="feedback"></div>
+    <div class="posts"></div>
+    <div class="feeds"></div>
     <div class="modal fade" id="postModal" tabindex="-1" aria-labelledby="postModalLabel" aria-hidden="true">
       <div class="modal-dialog">
         <div class="modal-content">
