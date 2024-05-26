@@ -3,4 +3,4 @@
 
 [![Maintainability](https://api.codeclimate.com/v1/badges/8f29e7ace18870fc25ce/maintainability)](https://codeclimate.com/github/alexeenkoivan/frontend-project-11/maintainability)
 
-https://vercel.com/alexeenkoivans-projects/frontend-project-11
+[My RSS Agregator](https://vercel.com/alexeenkoivans-projects/frontend-project-11)
