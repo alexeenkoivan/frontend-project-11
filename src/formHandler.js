@@ -73,7 +73,6 @@ export function handleSubmit(event) {
             feedId: state.feeds[state.feeds.length - 1].id,
           })));
 
-          // Показ сообщения об успешной загрузке
           document.querySelector('.feedback').textContent = i18n.t('status.success');
         })
         .catch((error) => {
