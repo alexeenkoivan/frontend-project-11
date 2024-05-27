@@ -64,24 +64,34 @@ export function handleSubmit(event) {
 
       fetchRSS(data.rssInput)
         .then((rssData) => {
-          const feedId = uniqueId();
-          state.feeds.push({ ...rssData.feed, id: feedId });
-          const posts = rssData.posts.map((post) => ({ ...post, id: uniqueId(), feedId }));
-          state.posts.push(...posts);
-          state.formState = 'success';
-          event.target.reset();
-          event.target.querySelector('input').focus();
+          console.log('Данные RSS:', rssData);
+
+          state.feeds.push(rssData.feed);
+          state.posts.push(...rssData.posts.map((post) => ({
+            ...post,
+            id: uniqueId(),
+            feedId: state.feeds[state.feeds.length - 1].id,
+          })));
+
+          // Показ сообщения об успешной загрузке
+          document.querySelector('.feedback').textContent = i18n.t('status.success');
         })
         .catch((error) => {
           console.error('Ошибка загрузки RSS:', error.message);
           state.error = 'networkError';
-          state.formState = 'failing';
+          document.querySelector('.feedback').textContent = i18n.t(`errors.${state.error}`);
         });
+
+      event.target.reset();
+      event.target.querySelector('input').focus();
     })
     .catch((error) => {
       console.error('Ошибка валидации:', i18n.t(`errors.${error.message}`));
-      state.error = error.message;
-      state.formState = 'failing';
+      const input = event.target.querySelector('input');
+      input.classList.add('error');
+      input.addEventListener('input', () => {
+        input.classList.remove('error');
+      });
     });
 }
 
