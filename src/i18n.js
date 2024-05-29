@@ -5,11 +5,7 @@ import ru from '../locales/ru';
 i18n
   .use(initReactI18next)
   .init({
-    resources: {
-      ru: {
-        translation: ru,
-      },
-    },
+    ru,
     lng: 'ru',
     fallbackLng: 'ru',
     interpolation: {
