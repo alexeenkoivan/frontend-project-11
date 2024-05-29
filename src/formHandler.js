@@ -17,7 +17,7 @@ yup.setLocale({
 });
 
 const schema = yup.object().shape({
-  rssInput: yup.string().url().required(),
+  url: yup.string().url().required(),
 });
 
 const state = {
@@ -56,13 +56,13 @@ export function handleSubmit(event) {
 
   schema.validate(data)
     .then(() => {
-      if (state.feeds.some((feed) => feed.url === data.rssInput)) {
+      if (state.feeds.some((feed) => feed.url === data.url)) {
         throw new Error('alreadyInList');
       }
 
       console.log('Данные валидны:', data);
 
-      fetchRSS(data.rssInput)
+      fetchRSS(data.url)
         .then((rssData) => {
           console.log('Данные RSS:', rssData);
 
@@ -108,14 +108,14 @@ export function watchForm(form) {
   });
 
   form.querySelector('input').addEventListener('input', (event) => {
-    watchedFormData.rssInput = event.target.value;
+    watchedFormData.url = event.target.value;
   });
 
   form.addEventListener('submit', handleSubmit);
 }
 
 document.addEventListener('DOMContentLoaded', () => {
-  const form = document.querySelector('form');
+  const form = document.querySelector('.rss-form');
   watchForm(form);
   updateFeeds();
 });
