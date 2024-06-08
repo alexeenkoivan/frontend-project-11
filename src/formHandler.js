@@ -23,6 +23,18 @@ const fetchRssFeed = (url) => axios.get(addProxy(url))
     return data;
   });
 
+const handleError = (error) => {
+  if (error.isParsingError) {
+    return 'notRss';
+  }
+
+  if (axios.isAxiosError(error)) {
+    return 'networkError';
+  }
+
+  return error.message ?? 'unknown';
+};
+
 const handleSubmit = (event) => {
   event.preventDefault();
   const formData = new FormData(event.target);
@@ -79,17 +91,8 @@ const handleSubmit = (event) => {
       }, i18n)('posts', state.posts);
     })
     .catch((error) => {
-      if (error.name === 'ValidationError') {
-        state.error = 'notUrl';
-      } else if (error.isParsingError) {
-        state.error = 'notRss';
-      } else if (error.message === 'networkError') {
-        state.error = 'networkError';
-      } else if (error.message === 'alreadyInList') {
-        state.error = 'alreadyInList';
-      } else {
-        state.error = 'unknown';
-      }
+      state.formState = 'invalid';
+      state.error = handleError(error);
       render(state, {
         feedback: document.querySelector('.feedback'),
       }, i18n)('error', state.error);
