@@ -1,121 +1,113 @@
 import * as yup from 'yup';
-import onChange from 'on-change';
 import axios from 'axios';
-import { uniqueId } from 'lodash';
-import i18n from './i18n';
-import fetchRSS from './rss';
+import _ from 'lodash';
+import i18n from 'i18next';
 import parse from './parser';
-
-yup.setLocale({
-  mixed: {
-    default: i18n.t('errors.unknown'),
-  },
-  string: {
-    url: i18n.t('errors.notUrl'),
-    required: i18n.t('errors.empty'),
-  },
-});
+import state from './state';
 
 const schema = yup.object().shape({
   url: yup.string().url().required(),
 });
 
-const state = {
-  feeds: [],
-  posts: [],
-  formState: 'filling',
-  error: null,
+const renderError = (message) => {
+  const feedbackElement = document.querySelector('.feedback');
+  feedbackElement.textContent = message;
+  feedbackElement.classList.add('text-danger');
+  feedbackElement.classList.remove('text-success');
 };
 
-const updateFeeds = () => {
-  const promises = state.feeds.map((feed) => axios.get(`https://allorigins.hexlet.app/get?disableCache=true&url=${encodeURIComponent(feed.url)}`)
-    .then((response) => {
-      const { posts } = parse(response.data.contents);
-      const newPosts = posts.filter((post) => !state.posts.find((p) => p.link === post.link));
-      newPosts.forEach((newPost) => {
-        const post = newPost;
-        post.id = uniqueId();
-        post.feedId = feed.id;
-      });
-      state.posts.push(...newPosts);
-    })
-    .catch((error) => {
-      console.error('Ошибка при обновлении RSS:', error.message);
-    }));
+const renderSuccess = (message) => {
+  const feedbackElement = document.querySelector('.feedback');
+  feedbackElement.textContent = message;
+  feedbackElement.classList.add('text-success');
+  feedbackElement.classList.remove('text-danger');
+};
 
-  Promise.all(promises).finally(() => {
-    setTimeout(updateFeeds, 5000);
+const renderFeeds = (feeds) => {
+  const feedsContainer = document.querySelector('.feeds');
+  feedsContainer.innerHTML = '';
+  feeds.forEach((feed) => {
+    const feedElement = document.createElement('div');
+    feedElement.classList.add('card', 'border-0');
+    feedElement.innerHTML = `
+      <div class="card-body">
+        <h2 class="card-title h4">${feed.title}</h2>
+        <p class="card-text">${feed.description}</p>
+      </div>
+    `;
+    feedsContainer.appendChild(feedElement);
   });
 };
 
-export function handleSubmit(event) {
+const renderPosts = (posts) => {
+  const postsContainer = document.querySelector('.posts');
+  postsContainer.innerHTML = '';
+  posts.forEach((post) => {
+    const postElement = document.createElement('li');
+    postElement.classList.add('list-group-item', 'd-flex', 'justify-content-between', 'align-items-start', 'border-0', 'border-end-0');
+    postElement.innerHTML = `
+      <a href="${post.link}" class="fw-bold" data-id="${post.id}" target="_blank" rel="noopener noreferrer">${post.title}</a>
+      <button type="button" class="btn btn-primary btn-sm" data-id="${post.id}" data-bs-toggle="modal" data-bs-target="#modal">Просмотр</button>
+    `;
+    postsContainer.appendChild(postElement);
+  });
+};
+
+const fetchRssFeed = (url) => {
+  const corsProxy = 'https://allorigins.hexlet.app/get?disableCache=true&url=';
+  return axios.get(`${corsProxy}${encodeURIComponent(url)}`)
+    .then((response) => {
+      const data = parse(response.data.contents);
+      return data;
+    });
+};
+
+const handleSubmit = (event) => {
   event.preventDefault();
-
   const formData = new FormData(event.target);
-  const data = Object.fromEntries(formData.entries());
+  const url = formData.get('url').trim();
 
-  schema.validate(data)
+  schema.validate({ url })
     .then(() => {
-      if (state.feeds.some((feed) => feed.url === data.url)) {
-        throw new Error('alreadyInList');
+      if (state.feeds.some((feed) => feed.url === url)) {
+        throw new Error(i18n.t('errors.duplicate'));
       }
 
-      console.log('Данные валидны:', data);
+      return fetchRssFeed(url);
+    })
+    .then((data) => {
+      const feed = {
+        id: _.uniqueId(),
+        title: data.feed.title,
+        description: data.feed.description,
+        url,
+      };
+      const posts = data.posts.map((post) => ({
+        id: _.uniqueId(),
+        feedId: feed.id,
+        title: post.title,
+        link: post.link,
+      }));
 
-      fetchRSS(data.url)
-        .then((rssData) => {
-          console.log('Данные RSS:', rssData);
+      state.feeds.push(feed);
+      state.posts = [...state.posts, ...posts];
 
-          state.feeds.push(rssData.feed);
-          state.posts.push(...rssData.posts.map((post) => ({
-            ...post,
-            id: uniqueId(),
-            feedId: state.feeds[state.feeds.length - 1].id,
-          })));
-
-          document.querySelector('.feedback').textContent = i18n.t('status.success');
-        })
-        .catch((error) => {
-          console.error('Ошибка загрузки RSS:', error.message);
-          state.error = 'networkError';
-          document.querySelector('.feedback').textContent = i18n.t(`errors.${state.error}`);
-        });
-
-      event.target.reset();
-      event.target.querySelector('input').focus();
+      renderFeeds(state.feeds);
+      renderPosts(state.posts);
+      renderSuccess(i18n.t('RSS успешно загружен'));
     })
     .catch((error) => {
-      console.error('Ошибка валидации:', i18n.t(`errors.${error.message}`));
-      const input = event.target.querySelector('input');
-      input.classList.add('error');
-      input.addEventListener('input', () => {
-        input.classList.remove('error');
-      });
+      if (error.name === 'ValidationError') {
+        renderError(i18n.t('errors.invalidUrl'));
+      } else if (error.message === i18n.t('errors.duplicate')) {
+        renderError(i18n.t('errors.duplicate'));
+      } else {
+        renderError(i18n.t('errors.network'));
+      }
     });
-}
+};
 
-export function watchForm(form) {
-  const formData = {};
+const form = document.querySelector('form');
+form.addEventListener('submit', handleSubmit);
 
-  const watchedFormData = onChange(formData, () => {
-    schema.validate(watchedFormData)
-      .then(() => {
-        form.querySelector('input').classList.remove('error');
-      })
-      .catch(() => {
-        form.querySelector('input').classList.add('error');
-      });
-  });
-
-  form.querySelector('input').addEventListener('input', (event) => {
-    watchedFormData.url = event.target.value;
-  });
-
-  form.addEventListener('submit', handleSubmit);
-}
-
-document.addEventListener('DOMContentLoaded', () => {
-  const form = document.querySelector('.rss-form');
-  watchForm(form);
-  updateFeeds();
-});
+export default handleSubmit;

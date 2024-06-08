@@ -1,6 +1,6 @@
 import './styles.scss';
 import 'bootstrap';
-import { handleSubmit } from './formHandler';
+import handleSubmit from './formHandler';
 
 document.addEventListener('DOMContentLoaded', () => {
   const form = document.querySelector('form');
