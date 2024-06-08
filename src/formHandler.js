@@ -16,6 +16,13 @@ const fetchRssFeed = (url) => {
     .then((response) => {
       const data = parse(response.data.contents, url);
       return data;
+    })
+    .catch((error) => {
+      if (error.response) {
+        throw new Error('networkError');
+      } else {
+        throw error;
+      }
     });
 };
 
@@ -79,6 +86,8 @@ const handleSubmit = (event) => {
         state.error = 'notUrl';
       } else if (error.isParsingError) {
         state.error = 'notRss';
+      } else if (error.message === 'networkError') {
+        state.error = 'networkError';
       } else {
         state.error = error.message;
       }
