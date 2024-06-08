@@ -23,4 +23,14 @@ document.addEventListener('DOMContentLoaded', () => {
 
   render(state, elements, i18n)('feeds', state.feeds);
   render(state, elements, i18n)('posts', state.posts);
+
+  elements.postsList.addEventListener('click', (event) => {
+    const postId = event.target.dataset.id;
+    if (postId) {
+      state.uiState.displayedPost = postId;
+      state.readPosts.add(postId);
+      render(state, elements, i18n)('uiState.displayedPost', postId);
+      render(state, elements, i18n)('uiState.viewedPostIds', state.uiState.viewedPostIds);
+    }
+  });
 });
