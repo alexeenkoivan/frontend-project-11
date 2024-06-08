@@ -56,6 +56,7 @@ const handleSubmit = (event) => {
         id: _.uniqueId(),
         feedId: feed.id,
         title: post.title,
+        description: post.description,
         link: post.link,
       }));
 

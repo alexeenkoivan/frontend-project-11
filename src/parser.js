@@ -1,7 +1,7 @@
 const parsePost = (post) => {
   const link = post.querySelector('link').textContent;
   const title = post.querySelector('title').textContent;
-  const description = post.querySelector('description').textContent;
+  const description = post.querySelector('description')?.textContent || 'Описание не найдено';
   const date = post.querySelector('pubDate').textContent;
   return {
     link,

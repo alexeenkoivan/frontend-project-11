@@ -29,21 +29,21 @@ const createButton = (post, i18next) => {
 
 const createPosts = (state, i18next) => {
   const posts = [];
-  state.posts.forEach((post) => {
+  state.posts.forEach((postItem) => {
     const liEl = document.createElement('li');
     liEl.classList.add('list-group-item', 'd-flex', 'justify-content-between', 'align-items-start', 'border-0', 'border-end-0');
     const aEl = document.createElement('a');
-    aEl.setAttribute('href', post.link);
-    aEl.setAttribute('data-id', post.id);
+    aEl.setAttribute('href', postItem.link);
+    aEl.setAttribute('data-id', postItem.id);
     aEl.setAttribute('target', '_blank');
     aEl.setAttribute('rel', 'noopener noreferrer');
-    if (state.readPosts.has(post.id)) {
+    if (state.readPosts.has(postItem.id)) {
       aEl.classList.add('fw-normal');
     } else {
       aEl.classList.add('fw-bold');
     }
-    aEl.textContent = post.title;
-    const buttonEl = createButton(post, i18next);
+    aEl.textContent = postItem.title;
+    const buttonEl = createButton(postItem, i18next);
     liEl.append(aEl);
     liEl.append(buttonEl);
     posts.push(liEl);
@@ -153,7 +153,7 @@ const renderPosts = (state, elements, i18next) => {
 
 const renderDisplayedPost = (state, elements, id) => {
   const { modalHeader, modalBody, modalHref } = elements;
-  const posts = state.posts.filter((post) => post.id === id);
+  const posts = state.posts.filter((postItem) => postItem.id === id);
   const [{ description, link, title }] = posts;
   modalHeader.textContent = title;
   modalBody.textContent = description;
