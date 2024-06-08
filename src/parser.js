@@ -16,7 +16,7 @@ const parse = (rss, url) => {
   const data = parser.parseFromString(rss, 'application/xml');
   const parseError = data.querySelector('parsererror');
   if (parseError) {
-    const error = new Error(parseError.textContent);
+    const error = new Error('notRss');
     error.isParsingError = true;
     throw error;
   }

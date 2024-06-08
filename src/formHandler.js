@@ -14,7 +14,7 @@ const fetchRssFeed = (url) => {
   const corsProxy = 'https://allorigins.hexlet.app/get?disableCache=true&url=';
   return axios.get(`${corsProxy}${encodeURIComponent(url)}`)
     .then((response) => {
-      const data = parse(response.data.contents);
+      const data = parse(response.data.contents, url);
       return data;
     });
 };
@@ -75,7 +75,13 @@ const handleSubmit = (event) => {
       }, i18n)('posts', state.posts);
     })
     .catch((error) => {
-      state.error = error.name === 'ValidationError' ? 'notUrl' : error.message;
+      if (error.name === 'ValidationError') {
+        state.error = 'notUrl';
+      } else if (error.isParsingError) {
+        state.error = 'notRss';
+      } else {
+        state.error = error.message;
+      }
       render(state, {
         feedback: document.querySelector('.feedback'),
       }, i18n)('error', state.error);
