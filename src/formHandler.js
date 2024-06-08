@@ -10,20 +10,29 @@ const schema = yup.object().shape({
   url: yup.string().url().required(),
 });
 
-const fetchRssFeed = (url) => {
-  const corsProxy = 'https://allorigins.hexlet.app/get?disableCache=true&url=';
-  return axios.get(`${corsProxy}${encodeURIComponent(url)}`)
-    .then((response) => {
-      const data = parse(response.data.contents, url);
-      return data;
-    })
-    .catch((error) => {
-      if (error.response) {
-        throw new Error('networkError');
-      } else {
-        throw error;
-      }
-    });
+const addProxy = (url) => {
+  const proxyUrl = new URL('/get', 'https://allorigins.hexlet.app');
+  proxyUrl.searchParams.append('disableCache', 'true');
+  proxyUrl.searchParams.append('url', url);
+  return proxyUrl.toString();
+};
+
+const fetchRssFeed = (url) => axios.get(addProxy(url))
+  .then((response) => {
+    const data = parse(response.data.contents, url);
+    return data;
+  });
+
+const handleError = (error) => {
+  if (error.isParsingError) {
+    return 'notRss';
+  }
+
+  if (axios.isAxiosError(error)) {
+    return 'networkError';
+  }
+
+  return error.message.key ?? 'unknown';
 };
 
 const handleSubmit = (event) => {
@@ -82,15 +91,7 @@ const handleSubmit = (event) => {
       }, i18n)('posts', state.posts);
     })
     .catch((error) => {
-      if (error.name === 'ValidationError') {
-        state.error = 'notUrl';
-      } else if (error.isParsingError) {
-        state.error = 'notRss';
-      } else if (error.message === 'networkError') {
-        state.error = 'networkError';
-      } else {
-        state.error = error.message;
-      }
+      state.error = handleError(error);
       render(state, {
         feedback: document.querySelector('.feedback'),
       }, i18n)('error', state.error);
