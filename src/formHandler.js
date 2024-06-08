@@ -75,7 +75,7 @@ const handleSubmit = (event) => {
       }, i18n)('posts', state.posts);
     })
     .catch((error) => {
-      state.error = error.message;
+      state.error = error.name === 'ValidationError' ? 'notUrl' : error.message;
       render(state, {
         feedback: document.querySelector('.feedback'),
       }, i18n)('error', state.error);
