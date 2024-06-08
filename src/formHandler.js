@@ -1,57 +1,14 @@
 import * as yup from 'yup';
-import axios from 'axios';
 import _ from 'lodash';
+import axios from 'axios';
 import i18n from 'i18next';
-import parse from './parser';
 import state from './state';
+import render from './render';
+import parse from './parser';
 
 const schema = yup.object().shape({
   url: yup.string().url().required(),
 });
-
-const renderError = (message) => {
-  const feedbackElement = document.querySelector('.feedback');
-  feedbackElement.textContent = message;
-  feedbackElement.classList.add('text-danger');
-  feedbackElement.classList.remove('text-success');
-};
-
-const renderSuccess = (message) => {
-  const feedbackElement = document.querySelector('.feedback');
-  feedbackElement.textContent = message;
-  feedbackElement.classList.add('text-success');
-  feedbackElement.classList.remove('text-danger');
-};
-
-const renderFeeds = (feeds) => {
-  const feedsContainer = document.querySelector('.feeds');
-  feedsContainer.innerHTML = '';
-  feeds.forEach((feed) => {
-    const feedElement = document.createElement('div');
-    feedElement.classList.add('card', 'border-0');
-    feedElement.innerHTML = `
-      <div class="card-body">
-        <h2 class="card-title h4">${feed.title}</h2>
-        <p class="card-text">${feed.description}</p>
-      </div>
-    `;
-    feedsContainer.appendChild(feedElement);
-  });
-};
-
-const renderPosts = (posts) => {
-  const postsContainer = document.querySelector('.posts');
-  postsContainer.innerHTML = '';
-  posts.forEach((post) => {
-    const postElement = document.createElement('li');
-    postElement.classList.add('list-group-item', 'd-flex', 'justify-content-between', 'align-items-start', 'border-0', 'border-end-0');
-    postElement.innerHTML = `
-      <a href="${post.link}" class="fw-bold" data-id="${post.id}" target="_blank" rel="noopener noreferrer">${post.title}</a>
-      <button type="button" class="btn btn-primary btn-sm" data-id="${post.id}" data-bs-toggle="modal" data-bs-target="#modal">${i18n.t('buttons.view')}</button>
-    `;
-    postsContainer.appendChild(postElement);
-  });
-};
 
 const fetchRssFeed = (url) => {
   const corsProxy = 'https://allorigins.hexlet.app/get?disableCache=true&url=';
@@ -70,10 +27,17 @@ const handleSubmit = (event) => {
   schema.validate({ url })
     .then(() => {
       if (state.feeds.some((feed) => feed.url === url)) {
-        throw new Error(i18n.t('errors.duplicate'));
+        throw new Error('alreadyInList');
       }
 
-      renderSuccess(i18n.t('status.sending'));
+      state.error = null;
+      state.formState = 'sending';
+      render(state, {
+        submit: document.querySelector('button[type="submit"]'),
+        urlInput: document.querySelector('input[name="url"]'),
+        feedback: document.querySelector('.feedback'),
+        form: event.target,
+      }, i18n)('formState', state.formState);
 
       return fetchRssFeed(url);
     })
@@ -94,20 +58,27 @@ const handleSubmit = (event) => {
       state.feeds.push(feed);
       state.posts = [...state.posts, ...posts];
 
-      renderFeeds(state.feeds);
-      renderPosts(state.posts);
-      renderSuccess(i18n.t('status.success'));
+      state.formState = 'added';
+      render(state, {
+        submit: document.querySelector('button[type="submit"]'),
+        urlInput: document.querySelector('input[name="url"]'),
+        feedback: document.querySelector('.feedback'),
+        form: event.target,
+      }, i18n)('formState', state.formState);
+      render(state, {
+        feedsList: document.querySelector('.feeds'),
+        postsList: document.querySelector('.posts'),
+      }, i18n)('feeds', state.feeds);
+      render(state, {
+        feedsList: document.querySelector('.feeds'),
+        postsList: document.querySelector('.posts'),
+      }, i18n)('posts', state.posts);
     })
     .catch((error) => {
-      if (error.name === 'ValidationError') {
-        renderError(i18n.t('errors.invalid'));
-      } else if (error.message === i18n.t('errors.duplicate')) {
-        renderError(i18n.t('errors.duplicate'));
-      } else if (error.message === i18n.t('errors.network')) {
-        renderError(i18n.t('errors.network'));
-      } else {
-        renderError(i18n.t('errors.unknown'));
-      }
+      state.error = error.message;
+      render(state, {
+        feedback: document.querySelector('.feedback'),
+      }, i18n)('error', state.error);
     });
 };
 
