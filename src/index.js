@@ -30,7 +30,7 @@ document.addEventListener('DOMContentLoaded', () => {
       state.uiState.displayedPost = postId;
       state.readPosts.add(postId);
       render(state, elements, i18n)('uiState.displayedPost', postId);
-      render(state, elements, i18n)('uiState.viewedPostIds', state.uiState.viewedPostIds);
+      render(state, elements, i18n)('uiState.viewedPostIds', state.readPosts);
     }
   });
 });

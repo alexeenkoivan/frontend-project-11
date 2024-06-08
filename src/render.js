@@ -77,43 +77,37 @@ const createList = (itemsType, state, i18next) => {
   return card;
 };
 
-const renderInvalid = ({ submit, urlInput, feedback }) => {
-  const localSubmit = submit;
-  const localUrlInput = urlInput;
-  const localFeedback = feedback;
-  localSubmit.disabled = false;
-  localUrlInput.classList.add('is-invalid');
-  localFeedback.classList.remove('text-success');
-  localFeedback.classList.remove('text-warning');
-  localFeedback.classList.add('text-danger');
+const renderInvalid = (elements) => {
+  const { submit, urlInput, feedback } = elements;
+  submit.disabled = false;
+  urlInput.classList.add('is-invalid');
+  feedback.classList.remove('text-success');
+  feedback.classList.remove('text-warning');
+  feedback.classList.add('text-danger');
 };
 
-const renderSending = ({ submit, urlInput, feedback }, i18next) => {
-  const localSubmit = submit;
-  const localUrlInput = urlInput;
-  const localFeedback = feedback;
-  localSubmit.disabled = true;
-  localUrlInput.classList.remove('is-invalid');
-  localFeedback.classList.remove('text-danger');
-  localFeedback.classList.remove('text-success');
-  localFeedback.classList.add('text-warning');
-  localFeedback.textContent = i18next.t('status.sending');
+const renderSending = (elements, i18next) => {
+  const { submit, urlInput, feedback } = elements;
+  submit.disabled = true;
+  urlInput.classList.remove('is-invalid');
+  feedback.classList.remove('text-danger');
+  feedback.classList.remove('text-success');
+  feedback.classList.add('text-warning');
+  feedback.textContent = i18next.t('status.sending');
 };
 
-const renderAdded = ({
-  submit, urlInput, feedback, form,
-}, i18next) => {
-  const localSubmit = submit;
-  const localUrlInput = urlInput;
-  const localFeedback = feedback;
-  localSubmit.disabled = false;
-  localUrlInput.classList.remove('is-invalid');
-  localFeedback.classList.remove('text-danger');
-  localFeedback.classList.remove('text-warning');
-  localFeedback.classList.add('text-success');
-  localFeedback.textContent = i18next.t('status.success');
+const renderAdded = (elements, i18next) => {
+  const {
+    submit, urlInput, feedback, form,
+  } = elements;
+  submit.disabled = false;
+  urlInput.classList.remove('is-invalid');
+  feedback.classList.remove('text-danger');
+  feedback.classList.remove('text-warning');
+  feedback.classList.add('text-success');
+  feedback.textContent = i18next.t('status.success');
   form.reset();
-  localUrlInput.focus();
+  urlInput.focus();
 };
 
 const renderState = (elements, i18next, value) => {
@@ -133,39 +127,37 @@ const renderState = (elements, i18next, value) => {
   }
 };
 
-const renderError = (state, { feedback }, i18next, error) => {
+const renderError = (state, elements, i18next, error) => {
+  const { feedback } = elements;
   if (error === null) {
     return;
   }
 
-  const localFeedback = feedback;
-  localFeedback.classList.add('text-danger');
-  localFeedback.textContent = i18next.t(`errors.${state.error}`);
+  feedback.classList.add('text-danger');
+  feedback.textContent = i18next.t(`errors.${state.error}`);
 };
 
-const renderFeeds = (state, { feedsList }, i18next) => {
-  const localFeedsList = feedsList;
-  localFeedsList.innerHTML = '';
+const renderFeeds = (state, elements, i18next) => {
+  const { feedsList } = elements;
+  feedsList.innerHTML = '';
   const feeds = createList('feeds', state, i18next);
-  localFeedsList.append(feeds);
+  feedsList.append(feeds);
 };
 
-const renderPosts = (state, { postsList }, i18next) => {
-  const localPostsList = postsList;
-  localPostsList.innerHTML = '';
+const renderPosts = (state, elements, i18next) => {
+  const { postsList } = elements;
+  postsList.innerHTML = '';
   const posts = createList('posts', state, i18next);
-  localPostsList.append(posts);
+  postsList.append(posts);
 };
 
-const renderDisplayedPost = (state, { modalHeader, modalBody, modalHref }, id) => {
-  const localModalHeader = modalHeader;
-  const localModalBody = modalBody;
-  const localModalHref = modalHref;
+const renderDisplayedPost = (state, elements, id) => {
+  const { modalHeader, modalBody, modalHref } = elements;
   const posts = state.posts.filter((post) => post.id === id);
   const [{ description, link, title }] = posts;
-  localModalHeader.textContent = title;
-  localModalBody.textContent = description;
-  localModalHref.setAttribute('href', link);
+  modalHeader.textContent = title;
+  modalBody.textContent = description;
+  modalHref.setAttribute('href', link);
 };
 
 const render = (state, elements, i18next) => (path, value) => {
