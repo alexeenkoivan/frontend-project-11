@@ -1,1 +1,68 @@
 @import "~bootstrap/scss/bootstrap";
+
+body {
+  font-family: 'Roboto', sans-serif;
+  background-color: #f8f9fa;
+  color: #212529;
+}
+
+header {
+  background-color: #343a40;
+  color: #fff;
+  padding: 1rem 0;
+  text-align: center;
+}
+
+.container {
+  max-width: 800px;
+  margin: 0 auto;
+  padding: 2rem;
+}
+
+h1 {
+  font-size: 2rem;
+}
+
+form {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 1rem;
+}
+
+form input {
+  flex-grow: 1;
+  margin-right: 0.5rem;
+}
+
+form button {
+  flex-shrink: 0;
+}
+
+.feedback {
+  margin-top: 10px;
+  font-size: 0.875rem;
+}
+
+.text-success {
+  color: green;
+}
+
+.text-danger {
+  color: red;
+}
+
+.feeds, .posts {
+  margin-top: 2rem;
+}
+
+.card {
+  margin-bottom: 1rem;
+}
+
+.list-group-item {
+  margin-bottom: 0.5rem;
+}
+
+.modal-body {
+  white-space: pre-wrap;
+}

@@ -94,7 +94,7 @@ const handleSubmit = (event) => {
 
       renderFeeds(state.feeds);
       renderPosts(state.posts);
-      renderSuccess(i18n.t('RSS успешно загружен'));
+      renderSuccess('RSS успешно загружен');
     })
     .catch((error) => {
       if (error.name === 'ValidationError') {
