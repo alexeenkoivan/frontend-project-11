@@ -47,7 +47,7 @@ const renderPosts = (posts) => {
     postElement.classList.add('list-group-item', 'd-flex', 'justify-content-between', 'align-items-start', 'border-0', 'border-end-0');
     postElement.innerHTML = `
       <a href="${post.link}" class="fw-bold" data-id="${post.id}" target="_blank" rel="noopener noreferrer">${post.title}</a>
-      <button type="button" class="btn btn-primary btn-sm" data-id="${post.id}" data-bs-toggle="modal" data-bs-target="#modal">Просмотр</button>
+      <button type="button" class="btn btn-primary btn-sm" data-id="${post.id}" data-bs-toggle="modal" data-bs-target="#modal">${i18n.t('buttons.view')}</button>
     `;
     postsContainer.appendChild(postElement);
   });
@@ -73,6 +73,8 @@ const handleSubmit = (event) => {
         throw new Error(i18n.t('errors.duplicate'));
       }
 
+      renderSuccess(i18n.t('status.sending'));
+
       return fetchRssFeed(url);
     })
     .then((data) => {
@@ -94,15 +96,17 @@ const handleSubmit = (event) => {
 
       renderFeeds(state.feeds);
       renderPosts(state.posts);
-      renderSuccess('RSS успешно загружен');
+      renderSuccess(i18n.t('status.success'));
     })
     .catch((error) => {
       if (error.name === 'ValidationError') {
-        renderError(i18n.t('errors.invalidUrl'));
+        renderError(i18n.t('errors.invalid'));
       } else if (error.message === i18n.t('errors.duplicate')) {
         renderError(i18n.t('errors.duplicate'));
-      } else {
+      } else if (error.message === i18n.t('errors.network')) {
         renderError(i18n.t('errors.network'));
+      } else {
+        renderError(i18n.t('errors.unknown'));
       }
     });
 };
