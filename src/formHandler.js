@@ -7,7 +7,11 @@ import render from './render';
 import parse from './parser';
 
 const schema = yup.object().shape({
-  url: yup.string().url().required(),
+  url: yup.string().url().required().test(
+    'is-already-in-list',
+    'alreadyInList',
+    (value) => !state.feeds.some((feed) => feed.url === value),
+  ),
 });
 
 const addProxy = (url) => {
@@ -21,6 +25,10 @@ const fetchRssFeed = (url) => axios.get(addProxy(url))
   .then((response) => {
     const data = parse(response.data.contents, url);
     return data;
+  })
+  .catch((error) => {
+    console.error('Fetch RSS Feed Error:', error);
+    throw error;
   });
 
 const handleSubmit = (event) => {
@@ -30,10 +38,6 @@ const handleSubmit = (event) => {
 
   schema.validate({ url })
     .then(() => {
-      if (state.feeds.some((feed) => feed.url === url)) {
-        throw new Error('alreadyInList');
-      }
-
       state.error = null;
       state.formState = 'sending';
       render(state, {
@@ -80,14 +84,13 @@ const handleSubmit = (event) => {
       }, i18n)('posts', state.posts);
     })
     .catch((error) => {
+      console.error('Handle Submit Error:', error);
       if (error.name === 'ValidationError') {
-        state.error = 'notUrl';
+        state.error = error.errors[0] === 'alreadyInList' ? 'alreadyInList' : 'notUrl';
       } else if (error.isParsingError) {
         state.error = 'notRss';
       } else if (axios.isAxiosError(error)) {
         state.error = 'networkError';
-      } else if (error.message === 'alreadyInList') {
-        state.error = 'alreadyInList';
       } else {
         state.error = 'unknown';
       }

@@ -153,11 +153,12 @@ const renderPosts = (state, elements, i18next) => {
 
 const renderDisplayedPost = (state, elements, id) => {
   const { modalHeader, modalBody, modalHref } = elements;
-  const posts = state.posts.filter((postItem) => postItem.id === id);
-  const [{ description, link, title }] = posts;
-  modalHeader.textContent = title;
-  modalBody.textContent = description;
-  modalHref.setAttribute('href', link);
+  const post = state.posts.find((postItem) => postItem.id === id);
+  if (post) {
+    modalHeader.textContent = post.title;
+    modalBody.textContent = post.description;
+    modalHref.setAttribute('href', post.link);
+  }
 };
 
 const render = (state, elements, i18next) => (path, value) => {
