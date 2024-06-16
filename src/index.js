@@ -48,10 +48,10 @@ const init = async () => {
     const postId = event.target.dataset.id;
     if (postId) {
       state.uiState.displayedPost = postId;
-      state.uiState.viewedPostIds.add(postId);
+      state.uiState.viewedPostIds.add(postId); // Добавляем пост в просмотренные
       state.readPosts.add(postId);
       render(state, elements, i18n)('uiState.displayedPost', postId);
-      render(state, elements, i18n)('uiState.viewedPostIds', state.uiState.viewedPostIds);
+      render(state, elements, i18n)('uiState.viewedPostIds', state.uiState.viewedPostIds); // Обновляем рендеринг просмотренных постов
     }
   });
 
@@ -59,10 +59,10 @@ const init = async () => {
     render(watchedState, elements, i18n)(path, value);
   });
 
-  const renderFeedsAndPosts = render(watchedState, elements, i18n);
+  const view = render(watchedState, elements, i18n);
 
-  renderFeedsAndPosts('feeds', watchedState.feeds);
-  renderFeedsAndPosts('posts', watchedState.posts);
+  view('feeds', watchedState.feeds);
+  view('posts', watchedState.posts);
 
   setInterval(updatePosts, 5000);
 };
