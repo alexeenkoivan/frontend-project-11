@@ -37,7 +37,7 @@ const createPosts = (state, i18next) => {
     aEl.setAttribute('data-id', postItem.id);
     aEl.setAttribute('target', '_blank');
     aEl.setAttribute('rel', 'noopener noreferrer');
-    if (state.readPosts.has(postItem.id)) {
+    if (state.uiState.viewedPostIds.has(postItem.id)) {
       aEl.classList.add('fw-normal');
     } else {
       aEl.classList.add('fw-bold');

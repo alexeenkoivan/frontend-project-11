@@ -48,8 +48,10 @@ const init = async () => {
     const postId = event.target.dataset.id;
     if (postId) {
       state.uiState.displayedPost = postId;
+      state.uiState.viewedPostIds.add(postId);
       state.readPosts.add(postId);
       render(state, elements, i18n)('uiState.displayedPost', postId);
+      render(state, elements, i18n)('uiState.viewedPostIds', state.uiState.viewedPostIds);
     }
   });
 
