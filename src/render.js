@@ -156,7 +156,7 @@ const renderDisplayedPost = (state, elements, id) => {
   const post = state.posts.find((postItem) => postItem.id === id);
   if (post) {
     modalHeader.textContent = post.title;
-    modalBody.textContent = post.description;
+    modalBody.innerHTML = post.description ? post.description : 'Описание отсутствует';
     modalHref.setAttribute('href', post.link);
   }
 };

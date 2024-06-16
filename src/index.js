@@ -49,7 +49,7 @@ const init = async () => {
     if (postId) {
       state.uiState.displayedPost = postId;
       state.readPosts.add(postId);
-      render(state, elements, i18n)('uiState.displayedPost', postId); // вызов рендеринга модального окна
+      render(state, elements, i18n)('uiState.displayedPost', postId);
     }
   });
 
