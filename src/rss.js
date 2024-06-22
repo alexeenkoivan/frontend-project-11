@@ -1,5 +1,6 @@
 import axios from 'axios';
 import parse from './parser';
+import { i18n } from './i18n';
 
 async function fetchRSS(url) {
   try {
@@ -8,7 +9,7 @@ async function fetchRSS(url) {
     return { feed, posts };
   } catch (error) {
     console.error('Ошибка при скачивании RSS:', error.message);
-    throw new Error('Ошибка при скачивании RSS');
+    throw new Error(i18n.t('errors.networkError'));
   }
 }
 
