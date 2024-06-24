@@ -5,21 +5,14 @@ import i18n from 'i18next';
 import state from './state';
 import render from './render';
 import parse from './parser';
+import { addProxy } from './rss';
 
 const schema = yup.object().shape({
-  url: yup.string().url().required().test(
-    'is-already-in-list',
+  url: yup.string().url().required().notOneOf(
+    state.feeds.map((feed) => feed.url),
     'alreadyInList',
-    (value) => !state.feeds.some((feed) => feed.url === value),
   ),
 });
-
-const addProxy = (url) => {
-  const proxyUrl = new URL('/get', 'https://allorigins.hexlet.app');
-  proxyUrl.searchParams.append('disableCache', 'true');
-  proxyUrl.searchParams.append('url', url);
-  return proxyUrl.toString();
-};
 
 const fetchRssFeed = (url) => axios.get(addProxy(url))
   .then((response) => {
@@ -64,6 +57,15 @@ const handleSubmit = (event) => {
         link: post.link,
       }));
 
+      if (state.feeds.some((existingFeed) => existingFeed.url === url)) {
+        state.formState = 'invalid';
+        state.error = 'alreadyInList';
+        render(state, {
+          feedback: document.querySelector('.feedback'),
+        }, i18n)('error', state.error);
+        return;
+      }
+
       state.feeds.push(feed);
       state.posts = [...state.posts, ...posts];
 
@@ -100,8 +102,5 @@ const handleSubmit = (event) => {
       }, i18n)('error', state.error);
     });
 };
-
-const form = document.querySelector('form');
-form.addEventListener('submit', handleSubmit);
 
 export default handleSubmit;

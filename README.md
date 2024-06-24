@@ -3,7 +3,7 @@
 
 [![Maintainability](https://api.codeclimate.com/v1/badges/8f29e7ace18870fc25ce/maintainability)](https://codeclimate.com/github/alexeenkoivan/frontend-project-11/maintainability)
 
-[My RSS Agregator](https://vercel.com/alexeenkoivans-projects/frontend-project-11)
+[My RSS Agregator](frontend-project-11-ecru-one.vercel.app)
 
 ## Описание проекта
 RSS Aggregator - это веб-приложение, которое позволяет пользователям собирать и просматривать различные RSS-ленты в одном месте. Проект создан для обучения основам фронтенд разработки и использует такие технологии, как Webpack, Babel, ESLint, Bootstrap и другие.

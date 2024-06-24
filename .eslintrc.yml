@@ -8,6 +8,9 @@ extends:
 
 parser: "@babel/eslint-parser"
 
+parserOptions:
+  requireConfigFile: false
+
 plugins:
   - babel
 

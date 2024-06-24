@@ -6,12 +6,12 @@ import handleSubmit from './formHandler';
 import initI18n, { i18n } from './i18n';
 import state from './state';
 import render from './render';
-import fetchRSS from './rss';
+import fetchRss from './rss';
 
 const UPDATE_INTERVAL = 5000;
 
 const updatePosts = () => {
-  const promises = state.feeds.map((feed) => fetchRSS(feed.url)
+  const promises = state.feeds.map((feed) => fetchRss(feed.url)
     .then(({ posts }) => {
       const newPosts = posts.filter(
         (post) => !state.posts.some((existingPost) => existingPost.link === post.link),
