@@ -10,14 +10,17 @@ import fetchRss from './rss';
 
 const UPDATE_INTERVAL = 5000;
 
-const updatePosts = () => {
-  const promises = state.feeds.map((feed) => fetchRss(feed.url)
+const updatePosts = (watchedState) => {
+  const promises = watchedState.feeds.map((feed) => fetchRss(feed.url)
     .then(({ posts }) => {
       const newPosts = posts.filter(
-        (post) => !state.posts.some((existingPost) => existingPost.link === post.link),
+        (post) => !watchedState.posts.some((existingPost) => existingPost.link === post.link),
       );
       if (newPosts.length > 0) {
-        state.posts = [...newPosts, ...state.posts];
+        const updatedPosts = [...newPosts, ...watchedState.posts];
+        const tempState = { ...watchedState };
+        tempState.posts = updatedPosts;
+        Object.assign(watchedState, tempState);
       }
     })
     .catch((error) => {
@@ -27,9 +30,9 @@ const updatePosts = () => {
   return Promise.all(promises);
 };
 
-const startUpdatingPosts = () => {
-  updatePosts().then(() => {
-    setTimeout(startUpdatingPosts, UPDATE_INTERVAL);
+const startUpdatingPosts = (watchedState) => {
+  updatePosts(watchedState).then(() => {
+    setTimeout(() => startUpdatingPosts(watchedState), UPDATE_INTERVAL);
   });
 };
 
@@ -51,17 +54,21 @@ const init = () => {
       render(watchedState, elements, i18n)(path, value);
     });
 
-    elements.form.addEventListener('submit', handleSubmit);
+    elements.form.addEventListener('submit', handleSubmit(watchedState));
 
     elements.postsList.addEventListener('click', (event) => {
       const postId = event.target.dataset.id;
       if (postId) {
-        watchedState.uiState.displayedPost = postId;
-        watchedState.uiState.viewedPostIds.add(postId);
+        const newUiState = {
+          ...watchedState.uiState,
+          displayedPost: postId,
+          viewedPostIds: new Set([...watchedState.uiState.viewedPostIds, postId]),
+        };
+        Object.assign(watchedState.uiState, newUiState);
       }
     });
 
-    startUpdatingPosts();
+    startUpdatingPosts(watchedState);
   });
 };
 
