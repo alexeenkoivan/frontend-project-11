@@ -14,6 +14,7 @@
   "author": "Ivan Alekseenko",
   "license": "ISC",
   "devDependencies": {
+    "@babel/eslint-parser": "^7.25.1",
     "@webpack-cli/generators": "^3.0.7",
     "css-loader": "^6.9.1",
     "eslint": "^8.54.0",

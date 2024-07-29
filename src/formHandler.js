@@ -30,9 +30,11 @@ const handleSubmit = (watchedState) => (event) => {
 
   schema.validate({ url })
     .then(() => {
-      const tempState = { ...watchedState };
-      tempState.error = null;
-      tempState.formState = 'sending';
+      const tempState = {
+        ...watchedState,
+        error: null,
+        formState: 'sending',
+      };
 
       return fetchRssFeed(url).then((data) => {
         const feed = {
@@ -49,28 +51,30 @@ const handleSubmit = (watchedState) => (event) => {
           link: post.link,
         }));
 
-        tempState.feeds.push(feed);
-        tempState.posts = [...tempState.posts, ...posts];
+        tempState.feeds = [...watchedState.feeds, feed];
+        tempState.posts = [...watchedState.posts, ...posts];
         tempState.formState = 'added';
-        return tempState;
+        Object.assign(watchedState, tempState);
       });
-    })
-    .then((tempState) => {
-      Object.assign(watchedState, tempState);
     })
     .catch((error) => {
       console.error('Handle Submit Error:', error);
-      const tempState = { ...watchedState };
+      let errorMsg;
       if (error.name === 'ValidationError') {
-        tempState.error = error.errors[0] === 'alreadyInList' ? 'alreadyInList' : 'notUrl';
+        errorMsg = error.errors[0] === 'alreadyInList' ? 'alreadyInList' : 'notUrl';
       } else if (error.isParsingError) {
-        tempState.error = 'notRss';
+        errorMsg = 'notRss';
       } else if (axios.isAxiosError(error)) {
-        tempState.error = 'networkError';
+        errorMsg = 'networkError';
       } else {
-        tempState.error = 'unknown';
+        errorMsg = 'unknown';
       }
-      tempState.formState = 'invalid';
+
+      const tempState = {
+        ...watchedState,
+        error: errorMsg,
+        formState: 'invalid',
+      };
       Object.assign(watchedState, tempState);
     });
 };

@@ -17,10 +17,7 @@ const updatePosts = (watchedState) => {
         (post) => !watchedState.posts.some((existingPost) => existingPost.link === post.link),
       );
       if (newPosts.length > 0) {
-        const updatedPosts = [...newPosts, ...watchedState.posts];
-        const tempState = { ...watchedState };
-        tempState.posts = updatedPosts;
-        Object.assign(watchedState, tempState);
+        watchedState.posts.push(...newPosts);
       }
     })
     .catch((error) => {
@@ -59,12 +56,8 @@ const init = () => {
     elements.postsList.addEventListener('click', (event) => {
       const postId = event.target.dataset.id;
       if (postId) {
-        const newUiState = {
-          ...watchedState.uiState,
-          displayedPost: postId,
-          viewedPostIds: new Set([...watchedState.uiState.viewedPostIds, postId]),
-        };
-        Object.assign(watchedState.uiState, newUiState);
+        watchedState.uiState.displayedPost = postId;
+        watchedState.uiState.viewedPostIds.add(postId);
       }
     });
 
