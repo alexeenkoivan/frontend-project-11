@@ -1,9 +1,10 @@
 const state = {
   feeds: [],
   posts: [],
-  loading: false,
-  error: null,
-  readPosts: new Set(),
+  formState: {
+    loading: false,
+    error: null,
+  },
   uiState: {
     displayedPost: null,
     viewedPostIds: new Set(),

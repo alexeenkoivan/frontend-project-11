@@ -21,20 +21,18 @@ const fetchRssFeed = (url) => axios.get(addProxy(url))
     throw error;
   });
 
-const handleSubmit = (watchedState) => (event) => {
+const handleSubmit = (state) => (event) => {
   event.preventDefault();
   const formData = new FormData(event.target);
   const url = formData.get('url').trim();
 
-  const schema = createSchema(watchedState.feeds);
+  const schema = createSchema(state.feeds);
 
   schema.validate({ url })
     .then(() => {
-      const tempState = {
-        ...watchedState,
-        error: null,
-        formState: 'sending',
-      };
+      const updatedState = { ...state };
+      updatedState.error = null;
+      updatedState.formState = 'sending';
 
       return fetchRssFeed(url).then((data) => {
         const feed = {
@@ -51,10 +49,10 @@ const handleSubmit = (watchedState) => (event) => {
           link: post.link,
         }));
 
-        tempState.feeds = [...watchedState.feeds, feed];
-        tempState.posts = [...watchedState.posts, ...posts];
-        tempState.formState = 'added';
-        Object.assign(watchedState, tempState);
+        updatedState.feeds.push(feed);
+        updatedState.posts.push(...posts);
+        updatedState.formState = 'added';
+        Object.assign(state, updatedState);
       });
     })
     .catch((error) => {
@@ -70,12 +68,10 @@ const handleSubmit = (watchedState) => (event) => {
         errorMsg = 'unknown';
       }
 
-      const tempState = {
-        ...watchedState,
-        error: errorMsg,
-        formState: 'invalid',
-      };
-      Object.assign(watchedState, tempState);
+      const updatedState = { ...state };
+      updatedState.error = errorMsg;
+      updatedState.formState = 'invalid';
+      Object.assign(state, updatedState);
     });
 };
 
